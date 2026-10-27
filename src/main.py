@@ -20,7 +20,10 @@ def main():
     marker_stream = two_stream.ThreadedVideoStream(marker_stream_source)
     print("started marker stream")
 
-    controller = two_stream.MultiController(two_stream.SocketController(controller_ip, controller_port), [two_stream.DebugController()])
+    controller = two_stream.MultiController(
+        two_stream.SocketController(controller_ip, controller_port),
+        [two_stream.DebugController()],
+    )
     # controller = two_stream.DebugController()
 
     # automatic configuration is so much nicer than re-deploying code each and every time the rover runs.
