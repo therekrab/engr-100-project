@@ -7,8 +7,7 @@ int topspeed = 255;
 #define BACK 's'
 #define STOP 'x'
 
-void Set_Speed(int Left, int Right)
-{
+void Set_Speed(int Left, int Right) {
   if (((int)Left)>topspeed) {Left = topspeed;}
   if (((int)Right)>topspeed) {Right = topspeed;}
   
@@ -64,6 +63,8 @@ void setup() {
   pinMode (9, OUTPUT);
   pinMode (11, OUTPUT);
 
+  pinMode(12, OUTPUT);
+
   Serial.begin(115200);
 
   stopcar();
@@ -102,32 +103,58 @@ void process_direction(char direction) {
   }
 }
 
+void drive(String pid_command) {
+  if (pid_command == "STOP") {
+    stopcar();
+    return;
+  }
+
+  // Parse into left/right speeds and direction
+  int firstCommaIndex = pid_command.indexOf(',');
+  int secondCommaIndex = pid_command.indexOf(',', firstCommaIndex + 1);
+
+  // Process both motor direction and speed
+  if (firstCommaIndex > 0 && secondCommaIndex > firstCommaIndex) {
+    int leftSpeed = pid_command.substring(0, firstCommaIndex).toInt();
+    int rightSpeed = pid_command.substring(firstCommaIndex + 1).toInt();
+    char direction = pid_command.substring(secondCommaIndex + 1)[0];
+
+    // Process motor direction
+    process_direction(direction);
+    Set_Speed(leftSpeed, rightSpeed);
+  }
+}
+
+void set_state(String cmd) {
+  int commaIndex = cmd.indexOf(',');
+  if (commaIndex < 0) {
+    return;
+  }
+  int state = cmd.substring(0, commaIndex).toInt();
+  int flag = cmd.substring(commaIndex + 1).toInt();
+
+  switch (state) {
+    case 0:
+      digitalWrite(12, flag);
+      break;
+  }
+}
 
 void loop() {
   // put your main code here, to run repeatedly:
   while (Serial.available()) {
-    String pid_command = Serial.readStringUntil('\n');
-    pid_command.trim(); // remove "\n" endline character
+    char message_type = Serial.read();
 
-    // if STOP received, then stop the car motors
-    if (pid_command == "STOP") {
-      stopcar();
-      continue;
-    }
+    String raw_input = Serial.readStringUntil('\n');
+    raw_input.trim(); // remove "\n" endline character
 
-    // Parse into left/right speeds and direction
-    int firstCommaIndex = pid_command.indexOf(',');
-    int secondCommaIndex = pid_command.indexOf(',', firstCommaIndex + 1);
-
-    // Process both motor direction and speed
-    if (firstCommaIndex > 0 && secondCommaIndex > firstCommaIndex) {
-      int leftSpeed = pid_command.substring(0, firstCommaIndex).toInt();
-      int rightSpeed = pid_command.substring(firstCommaIndex + 1).toInt();
-      char direction = pid_command.substring(secondCommaIndex + 1)[0];
-
-      // Process motor direction
-      process_direction(direction);
-      Set_Speed(leftSpeed, rightSpeed);
+    switch (message_type) {
+      case 'D':
+        drive(raw_input);
+        break;
+      case 'S':
+        set_state(raw_input);
+        break;
     }
   }
 }
