@@ -13,21 +13,19 @@ marker_stream_source = f"http://{marker_ip}/stream"
 controller_ip = line_follow_ip
 controller_port = 5005
 
-
 def main():
-    line_follow_stream = two_stream.ThreadedVideoStream(line_follow_stream_source)
+    line_follow_stream = two_stream.ThreadedVideoStream(line_follow_stream_source, "line_follow")
     print("started line following stream")
-    marker_stream = two_stream.ThreadedVideoStream(marker_stream_source)
+    marker_stream = two_stream.ThreadedVideoStream(marker_stream_source, "marker")
     print("started marker stream")
 
     controller = two_stream.MultiController(
         two_stream.SocketController(controller_ip, controller_port),
         [two_stream.DebugController()],
     )
-    # controller = two_stream.DebugController()
 
     # automatic configuration is so much nicer than re-deploying code each and every time the rover runs.
-    controller.send("P0.9,0.0,0.25")
+    controller.send("P0.6,0.0,0.3")
 
     while True:
         # start of loop, check if either friend has a new value for us:

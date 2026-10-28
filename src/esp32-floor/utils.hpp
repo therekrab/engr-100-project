@@ -4,15 +4,15 @@
 #define CAMERA_MODEL_AI_THINKER // Has PSRAM
 #include "camera_pins.h"
 
-#define BASE_SPEED 90
+#define BASE_SPEED 85
 #define TOP_SPEED 255
-#define INFLECTION_POINT 3.0
+#define INFLECTION_POINT 7.0
 #define port 5005
 
 // define PID control constants
-inline double K_P = 0.9;
+inline double K_P = 0.8;
 inline double K_I = 0.0;
-inline double K_D = 0.5;
+inline double K_D = 0.0;
 inline WiFiServer server(port);
 
 inline const char *ssid_STA = "ENGR100-400"; // Enter the router name

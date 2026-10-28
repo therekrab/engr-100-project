@@ -1,3 +1,4 @@
+import sqlite3
 import socket
 import time
 from abc import ABC, abstractmethod
@@ -5,14 +6,19 @@ from threading import Lock, Thread
 
 import cv2
 
+POOL_SIZE = 50
 
 class ThreadedVideoStream:
-    def __init__(self, src_url):
+
+    def __init__(self, src_url, name="camera_stream"):
+        self.name = name
         self.stream = cv2.VideoCapture(src_url)
         self.stopped = False
         self.ok, self.frame = self.stream.read()
         self.lock = Lock()
         self.seen_latest = False
+        # self.image_pool = [None for _ in range(POOL_SIZE)]
+        # self.image_pool_next = 0
         time.sleep(1)
         self.start()
 
@@ -31,6 +37,10 @@ class ThreadedVideoStream:
                 self.ok = ok
                 self.frame = frame
                 self.seen_latest = False
+                # if (fc := frame.copy()) is not None:
+                    # self.image_pool[self.image_pool_next] = fc
+                    # self.image_pool_next += 1
+                    # self.image_pool_next %= POOL_SIZE
 
     def read(self):
         with self.lock:
@@ -50,7 +60,12 @@ class ThreadedVideoStream:
         with self.lock:
             self.stopped = True
         self.stream.release()
-
+        # save captured data
+        # for inc in range(POOL_SIZE):
+            # i = (self.image_pool_next + inc) % POOL_SIZE
+            # if (img := self.image_pool[i]) is not None:
+            #     fname = f"images/{self.name}_{inc}.jpg"
+            #     cv2.imwrite(fname, img)
 
 class Controller(ABC):
     @abstractmethod

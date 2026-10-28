@@ -19,6 +19,7 @@ class State {
 private:
   OpMode next;
 public:
+  virtual ~State() = default;
   void set_next(OpMode opmode);
 
   virtual void run(const Command &cmd) = 0;

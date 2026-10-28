@@ -2,11 +2,14 @@ import cv2
 import numpy as np
 
 import two_stream
+from timing_capture import log_time
 
 low_orange = np.array([0, 0, 20], dtype=np.uint8)
 high_orange = np.array([70, 255, 255], dtype=np.uint8)
-angle_weight = 40
+line_weight = 1
+angle_weight = 50
 
+@log_time("line_follow")
 def update(frame, controller: two_stream.Controller):
     # Blur the frame to reduce noise
     frame = cv2.GaussianBlur(frame, (5, 5), 0)
@@ -60,8 +63,11 @@ def update(frame, controller: two_stream.Controller):
             # Angle error (slope relative to vertical)
             angle_error = slope
 
+            if (offset_error * angle_error < 0):
+                angle_error = 0
+
             # Combined error
-            error = offset_error + angle_weight * angle_error
+            error = line_weight * offset_error + angle_weight * angle_error * abs(angle_error)
 
             # Draw detected contour
             cv2.putText(frame, "Line: FOUND", (0, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)

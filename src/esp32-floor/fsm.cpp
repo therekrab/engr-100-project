@@ -65,6 +65,7 @@ void Vacant::run(const Command& cmd) {
         break;
   }
 }
+
 void Vacant::process_tag(const String& input) {
   int tagId = input.toInt();
   if (tagId % 2 == 0) {

@@ -8,7 +8,7 @@ void follow_line(const String& raw_input) {
   }
 
   float cte = raw_input.toFloat(); // convert raw_input into the actual cte float
-  float dt = 0.2; // set to 0.2 for stability, this is stupid as shit
+  float dt = 0.2; // set to 0.2 for stability
 
   float left_factor = 1.0; // if robot leans right, increase left factor
   float right_factor = 1.0; // if robot leans left, increase right factor
