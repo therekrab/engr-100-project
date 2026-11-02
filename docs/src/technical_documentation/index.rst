@@ -1,5 +1,4 @@
 Technical Documentation
 =======================
 
-This section is where we'd put technical documents, code writeups, etc.
-
+This section describes the technical workings of our project. This section is still in the works.
