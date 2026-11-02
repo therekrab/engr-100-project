@@ -1,3 +1,4 @@
 .env
 docs/build
 src/images
+src/__pycache__
