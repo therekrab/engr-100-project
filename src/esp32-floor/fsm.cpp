@@ -1,12 +1,18 @@
+#include "esp32-hal.h"
 #include "Arduino.h"
 #include "fsm.hpp"
 #include "utils.hpp"
+
+bool Command::is_empty() const {
+  return cmd == nullptr || type == 0;
+}
 
 State* get_state(OpMode opmode) {
   static State* vacant = new Vacant();
   static State* pickup = new Pickup();
   static State* delivery = new Delivery();
   static State* dropoff = new Dropoff();
+  
   switch (opmode) {
   case OpMode::Vacant:
     return vacant;
@@ -47,18 +53,15 @@ Dropoff::Dropoff() {
 }
 
 void Vacant::run(const Command& cmd) {
-  if (cmd.type == 0 || cmd.cmd == nullptr) {
-    // For now, we have nothing to do in this case. Stop.
+  if (cmd.is_empty()) {
+    // For now, we have nothing to do in this case.
     return;
   }
+
   const String& raw_input = *cmd.cmd;
   switch (cmd.type) {
       case 'L':
-        Serial.print("D");
         follow_line(raw_input);
-        break;
-      case 'P':
-        updatePID(raw_input);
         break;
       case 'T':
         process_tag(raw_input);
@@ -67,19 +70,65 @@ void Vacant::run(const Command& cmd) {
 }
 
 void Vacant::process_tag(const String& input) {
-  int tagId = input.toInt();
-  if (tagId % 2 == 0) {
-    Serial.println("S0,1");
-  } else {
-    Serial.println("S0,0");
+  mem.seenTagId = input.toInt();
+  stopcar();
+  set_next(OpMode::Pickup);
+}
+
+void Pickup::run(const Command& cmd) {
+  if (millis() - start_time > timeout) {
+    set_next(OpMode::Delivery);
+    send_set_state_message(0, 0);
   }
 }
 
-void Pickup::run(const Command& cmd) {}
-void Delivery::run(const Command& cmd) {}
-void Dropoff::run(const Command& cmd) {}
+void Delivery::run(const Command& cmd) {
+  if (cmd.is_empty()) {
+    return;
+  }
 
-void Vacant::reset() {}
-void Pickup::reset() {}
-void Delivery::reset() {}
-void Dropoff::reset() {}
+  const String& raw_input = *cmd.cmd;
+  switch (cmd.type) {
+      case 'L':
+        follow_line(raw_input);
+        break;
+      case 'T':
+        process_tag(raw_input);
+        break;
+  }
+}
+
+void Delivery::process_tag(const String& input) {
+  int seen = input.toInt();
+  if (mem.seenTagId == seen) {
+    stopcar();
+    set_next(OpMode::Dropoff);
+  }
+}
+
+void Dropoff::run(const Command& cmd) {
+  if (millis() - start_time > timeout) {
+    set_next(OpMode::Vacant);
+    send_set_state_message(0, 0);
+  }
+}
+
+void Vacant::reset() {
+  set_next(OpMode::Vacant);
+  mem.seenTagId = -1;
+  send_set_state_message(0, 1 << 0);
+}
+void Pickup::reset() {
+  set_next(OpMode::Pickup);
+  start_time = millis();
+  send_set_state_message(0, 1 << 1);
+}
+void Delivery::reset() {
+  set_next(OpMode::Delivery);
+  send_set_state_message(0, 1 << 2);
+}
+void Dropoff::reset() {
+  set_next(OpMode::Dropoff);
+  start_time = millis();
+  send_set_state_message(0, 1 << 3);
+}

@@ -11,9 +11,17 @@ enum class OpMode : char {
 struct Command {
   char type;
   String *cmd;
+
+  bool is_empty() const;
 };
 
 const Command nullcmd = {0, nullptr};
+
+struct RoverMemory {
+  int seenTagId;
+};
+
+inline RoverMemory mem = {-1};
 
 class State {
 private:
@@ -40,6 +48,9 @@ public:
 };
 
 class Pickup: public State {
+private:
+  static const unsigned long timeout = 2000; // 1 second
+  unsigned long start_time;
 public:
   Pickup();
   void run(const Command &cmd) override;
@@ -47,6 +58,8 @@ public:
 };
 
 class Delivery: public State {
+private:
+  void process_tag(const String& input);
 public:
   Delivery();
   void run(const Command &cmd) override;
@@ -54,6 +67,9 @@ public:
 };
 
 class Dropoff: public State {
+private:
+  static const unsigned long timeout = 5000;
+  unsigned long start_time;
 public:
   Dropoff();
   void run(const Command &cmd) override;

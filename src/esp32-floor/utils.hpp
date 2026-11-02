@@ -22,11 +22,17 @@ inline IPAddress local_IP(192, 168, 50, 204); // Set the IP address of ESP32 its
 inline IPAddress gateway(192, 168, 50, 1); // Gateway for this device is the AP/Object Detection ESP32's IP Address
 inline IPAddress subnet(255, 255, 255, 0);
 
+// Utility methods and whatnots
 void WiFiSetup();
-
+void stopcar();
 void follow_line(const String& raw_input);
 float pid_control(float error, float dt);
 char determine_direction(float cte);
 void startCameraServer();
 void cameraServerSetup();
 void updatePID(String input);
+
+// Simpler communication with Arduino:
+
+void send_drive_message(float left_side_speed, float right_side_speed, char direction);
+void send_set_state_message(int state, int flag);

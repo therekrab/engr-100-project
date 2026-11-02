@@ -1,9 +1,8 @@
 #include "utils.hpp"
 
 void follow_line(const String& raw_input) {
-  // STOP if no line is detected
   if (raw_input == "STOP") {
-    Serial.println(raw_input);
+    stopcar();
     return;
   }
 
@@ -19,8 +18,11 @@ void follow_line(const String& raw_input) {
 
   char direction = determine_direction(cte); // determine how to shift the car's movement based on CTE
 
-  String pid_cmd = String(left_side_speed) + "," + String(right_side_speed) + "," + String(direction);    
-  Serial.println(pid_cmd); // send PID values to Arduino Nano
+  send_drive_message(left_side_speed, right_side_speed, direction);
+}
+
+void stopcar() {
+  Serial.println("DSTOP");
 }
 
 float pid_control(float error, float dt) {
@@ -123,4 +125,20 @@ void updatePID(String input) {
   K_P = input.substring(0, firstCommaIndex).toFloat();
   K_I = input.substring(firstCommaIndex + 1, secondCommaIndex).toFloat();
   K_D = input.substring(secondCommaIndex + 1).toFloat();
+}
+
+void send_drive_message(float left_side_speed, float right_side_speed, char direction) {
+  Serial.print('D');
+  Serial.print(left_side_speed);
+  Serial.print(',');
+  Serial.print(right_side_speed);
+  Serial.print(',');
+  Serial.println(direction);
+}
+
+void send_set_state_message(int state, int flag) {
+  Serial.print('S');
+  Serial.print(state);
+  Serial.print(',');
+  Serial.println(flag);
 }

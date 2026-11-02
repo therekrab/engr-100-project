@@ -6,7 +6,7 @@ from timing_capture import log_time
 aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
 
 detector_params = cv2.aruco.DetectorParameters()
-detector_params.minMarkerPerimeterRate = 0.1 # require bigger tags in frame than the default.
+detector_params.minMarkerPerimeterRate = 0.3 # require bigger tags in frame than the default.
 detector = cv2.aruco.ArucoDetector(aruco_dict, detector_params)
 
 @log_time("marker")

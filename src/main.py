@@ -23,9 +23,10 @@ def main():
         two_stream.SocketController(controller_ip, controller_port),
         [two_stream.DebugController()],
     )
+    # controller = two_stream.DebugController()
 
     # automatic configuration is so much nicer than re-deploying code each and every time the rover runs.
-    controller.send("P0.6,0.0,0.3")
+    controller.send("P0.60,0.0,0.35")
 
     while True:
         # start of loop, check if either friend has a new value for us:

@@ -7,7 +7,7 @@ from timing_capture import log_time
 low_orange = np.array([0, 0, 20], dtype=np.uint8)
 high_orange = np.array([70, 255, 255], dtype=np.uint8)
 line_weight = 1
-angle_weight = 50
+angle_weight = 70
 
 @log_time("line_follow")
 def update(frame, controller: two_stream.Controller):

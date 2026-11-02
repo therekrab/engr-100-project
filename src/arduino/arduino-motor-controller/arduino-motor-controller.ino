@@ -64,6 +64,9 @@ void setup() {
   pinMode (11, OUTPUT);
 
   pinMode(12, OUTPUT);
+  pinMode(13, OUTPUT);
+  pinMode(2, OUTPUT);
+  pinMode(3, OUTPUT);
 
   Serial.begin(115200);
 
@@ -135,7 +138,10 @@ void set_state(String cmd) {
 
   switch (state) {
     case 0:
-      digitalWrite(12, flag);
+      digitalWrite(12, flag & (1 << 0));
+      digitalWrite(13, flag & (1 << 1));
+      digitalWrite(3, flag & (1 << 2));
+      digitalWrite(2, flag & (1 << 3));
       break;
   }
 }
